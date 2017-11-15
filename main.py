@@ -86,17 +86,17 @@ def write_update(message):
     date_time = datetime.datetime.today()
     date = date_time.date()
     time = date_time.time()
-    log_isnt_created = not os.path.isfile(f'log-{date}.txt')
+    log_isnt_created = not os.path.isfile('log-{}.txt'.format(date))
 
     if log_isnt_created:
 
-        with open(f'log-{date}.txt', 'w') as file:
+        with open('log-{}.txt'.format(date), 'w') as file:
 
-            file.write(f'logs from {date} \n')
+            file.write('logs from {} \n'.format(date))
 
-    with open(f'log-{date}.txt', 'a') as file:
+    with open('log-{}.txt'.format(date), 'a') as file:
 
-        file.write(f'{time}: {message}\n')
+        file.write('{}: {}\n'.format(time, message))
 
 
 

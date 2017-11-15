@@ -1,6 +1,2 @@
-import feedparser
-import datetime
-import time
-import telepot
-from pprint import pprint
-import os.path
+feedparser >= 5.2.1
+telepot >= 12.4
