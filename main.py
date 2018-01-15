@@ -132,8 +132,6 @@ def main():
         send_messages(bot, unsend_messages, adress)
 
 
-
-
 if '__main__' == __name__:
 
     try:
