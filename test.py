@@ -1,9 +1,10 @@
 import telepot
+import datetime
 
 token = 'TOKEN'
 bot = telepot.Bot(token)
 
-bot.sendMessage('@fh_dortmund_aktuelles', 'hi')
+bot.sendMessage('TOKEN', 'hi')
 
 
 

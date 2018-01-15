@@ -106,6 +106,7 @@ def send_messages(bot, unsend_messages, adress):
         title = message['title']
         timex = message['published_parsed']
         timex = datetime.datetime(*timex[:6])
+        timex = timex + datetime.timedelta(hours=1)
         timex = timex.strftime("%d. %B %Y - %H:%M:%S")
         title = title + ':\n\n'
         summary = message['summary'].replace('<br />', '')
