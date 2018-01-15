@@ -8,7 +8,7 @@ import os.path
 
 def get_last_update():
 
-    with open('save.txt', 'r') as file:
+    with open('/home/rss_feed_fh/save.txt', 'r') as file:
         date_string = file.read()
 
     parsed_update = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
@@ -51,7 +51,7 @@ def update_date(date):
 
     formatted_date = date.strftime('%Y-%m-%d %H:%M:%S')
 
-    with open('save.txt', 'w') as file:
+    with open('/home/rss_feed_fh/save.txt', 'w') as file:
 
         file.write(formatted_date)
 
@@ -66,13 +66,10 @@ def get_new_articles(old_date, entries):
         formatted_entry_time = datetime.datetime(*entry_time[:6])
 
         print(formatted_entry_time)
-        print(old_date)
 
         reached_old_entry = old_date == formatted_entry_time
 
         if reached_old_entry:
-
-            print('hi')
 
             return items_wich_need_to_be_sent
 
@@ -84,27 +81,42 @@ def get_new_articles(old_date, entries):
 def write_update(message):
 
     date_time = datetime.datetime.today()
-    date = date_time.date()
-    time = date_time.time()
-    log_isnt_created = not os.path.isfile('log-{}.txt'.format(date))
+    current_date = date_time.date()
+    current_time = date_time.time()
+    log_isnt_created = not os.path.isfile('/home/rss_feed_fh/log-{}.txt'.format(current_date))
 
     if log_isnt_created:
 
-        with open('log-{}.txt'.format(date), 'w') as file:
+        with open('/home/rss_feed_fh/log-{}.txt'.format(current_date), 'w') as file:
 
-            file.write('logs from {} \n'.format(date))
+            file.write('/home/rss_feed_fh/logs from {} \n'.format(current_date))
 
-    with open('log-{}.txt'.format(date), 'a') as file:
+    with open('/home/rss_feed_fh/log-{}.txt'.format(current_date), 'a') as file:
 
-        file.write('{}: {}\n'.format(time, message))
-
-
+        file.write('{}: {}\n'.format(current_time, message))
 
 
+def send_messages(bot, unsend_messages, adress):
+
+    correct_oder_list = reversed(unsend_messages)
+
+    for message in correct_oder_list:
+
+        pprint(message)
+        title = message['title']
+        timex = message['published_parsed']
+        timex = datetime.datetime(*timex[:6])
+        timex = timex.strftime("%d. %B %Y - %H:%M:%S")
+        title = title + ':\n\n'
+        summary = message['summary'].replace('<br />', '')
+        message = title + summary + '\n\n' + timex
+        bot.sendMessage(adress, message)
+        time.sleep(1)
 
 
 def main():
 
+    adress = '@fh_dortmund_aktuelles'
     rss_feed_url = 'http://www.inf.fh-dortmund.de/rss.php'
     token = 'TOKEN'
     bot = telepot.Bot(token)
@@ -121,18 +133,7 @@ def main():
 
     unsend_messages = get_new_articles(last_update, entries)
 
-    for message in unsend_messages:
-
-        pprint(message)
-        title = message['title']
-        timex = message['published_parsed']
-        timex = datetime.datetime(*timex[:6])
-        timex = timex.strftime("%d. %B %Y - %H:%M:%S")
-        title = title + ':\n\n'
-        summary = message['summary'].replace('<br />', '')
-        lolz = title + summary + '\n\n' + timex
-        bot.sendMessage(TOKEN, lolz)
-        time.sleep(1)
+    send_messages(bot, unsend_messages, adress)
 
 
 if '__main__' == __name__:
@@ -140,7 +141,6 @@ if '__main__' == __name__:
     try:
 
         main()
-        write_update('Everything ok')
 
     except Exception:
 
