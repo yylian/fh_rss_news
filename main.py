@@ -2,49 +2,47 @@ import feedparser
 import datetime
 import time
 import telepot
-from pprint import pprint
 import os.path
 
 
 def get_last_update():
 
     with open('/home/rss_feed_fh/save.txt', 'r') as file:
-        date_string = file.read()
 
-    parsed_update = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+        unparsed_last_update = file.read()
 
-    return parsed_update
+    last_update = datetime.datetime.strptime(unparsed_last_update, '%Y-%m-%d %H:%M:%S')
+
+    return last_update
 
 
 def get_rss_feed_from_url(url):
 
-    complete_feed = feedparser.parse(url)
+    rss_feed = feedparser.parse(url)
 
-    return complete_feed
-
-
-def get_entries(feed_dict):
-
-    entries_from_feed = feed_dict['entries']
-
-    return entries_from_feed
+    return rss_feed
 
 
-def check_update(first_entry_date, last_update):
+def get_entries(rss_feed):
 
-    formatted_first_entry_date = datetime.datetime(*first_entry_date[:6])
-    first_entry_is_not_changed = formatted_first_entry_date == last_update
+    entires = rss_feed['entries']
+
+    return entires
+
+
+def check_update(first_entry_date, last_update_date):
+
+    first_entry_is_not_changed = first_entry_date == last_update_date
 
     if first_entry_is_not_changed:
 
-        print('No updates!')
-
-        return True
+        return False
 
     else:
 
-        update_date(formatted_first_entry_date)
-        return False
+        update_date(first_entry_date)
+
+        return True
 
 
 def update_date(date):
@@ -64,9 +62,6 @@ def get_new_articles(old_date, entries):
 
         entry_time = entry['published_parsed']
         formatted_entry_time = datetime.datetime(*entry_time[:6])
-
-        print(formatted_entry_time)
-
         reached_old_entry = old_date == formatted_entry_time
 
         if reached_old_entry:
@@ -102,7 +97,6 @@ def send_messages(bot, unsend_messages, adress):
 
     for message in correct_oder_list:
 
-        pprint(message)
         title = message['title']
         timex = message['published_parsed']
         timex = datetime.datetime(*timex[:6])
@@ -120,21 +114,24 @@ def main():
     adress = '@fh_dortmund_aktuelles'
     rss_feed_url = 'http://www.inf.fh-dortmund.de/rss.php'
     token = 'TOKEN'
+
     bot = telepot.Bot(token)
 
     complete_feed = get_rss_feed_from_url(rss_feed_url)
     entries = get_entries(complete_feed)
 
     first_entry_date = entries[0]['published_parsed']
+    formatted_first_entry_date = datetime.datetime(*first_entry_date[:6])
     last_update = get_last_update()
 
-    if check_update(first_entry_date, last_update):
+    update_available = check_update(formatted_first_entry_date, last_update)
 
-        return
+    if update_available:
 
-    unsend_messages = get_new_articles(last_update, entries)
+        unsend_messages = get_new_articles(last_update, entries)
+        send_messages(bot, unsend_messages, adress)
 
-    send_messages(bot, unsend_messages, adress)
+
 
 
 if '__main__' == __name__:
