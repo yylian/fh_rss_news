@@ -3,6 +3,19 @@ import datetime
 import time
 import telepot
 import os.path
+import sys
+
+def get_telegram_token():
+
+    try:
+
+        token = sys.argv[1]
+
+    except IndexError:
+
+        print("You have not given an token on input")
+
+    return token
 
 
 def get_last_update():
@@ -113,7 +126,7 @@ def main():
 
     adress = '@fh_dortmund_aktuelles'
     rss_feed_url = 'http://www.inf.fh-dortmund.de/rss.php'
-    token = 'TOKEN'
+    token = get_telegram_token()
 
     bot = telepot.Bot(token)
 
