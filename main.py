@@ -103,17 +103,19 @@ def write_update(message):
     filename = 'log-{}.txt'.format(current_date)
     filepath = get_filepath(filename)
 
-    log_isnt_created = not os.path.isfile(filepath)
+    log_isnt_created = os.path.isfile(filepath) is False
 
     if log_isnt_created:
 
         with open(filepath, 'w') as file:
 
-            file.write('logs from {} \n'.format(current_date))
+            file.write('logs from {}'.format(current_date))
+            file.write('\n')
 
     with open(filepath, 'a') as file:
 
-        file.write('{}: {}\n'.format(current_time, message))
+        file.write('{}: {}'.format(current_time, message))
+        file.write('\n')
 
 
 def send_messages(bot, unsend_messages, adress):
