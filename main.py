@@ -85,9 +85,9 @@ def get_new_articles(old_date, entries):
 
     for entry in entries:
 
-        entry_time = entry['published_parsed']
-        formatted_entry_time = datetime.datetime(*entry_time[:6])
-        reached_old_entry = old_date >= formatted_entry_time
+        unformatted_entry_time = entry['published_parsed']
+        entry_time = datetime.datetime(*unformatted_entry_time[:6])
+        reached_old_entry = old_date >= entry_time
 
         if reached_old_entry:
 
