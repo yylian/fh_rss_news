@@ -21,9 +21,8 @@ This Python script provides university newsfeeds as a Telegram bot.
 2. Check the RSS feed for the latest added Message and adjust the save.txt to the date from the feed.
 3. Move `main.py`, `requirements.txt`, and `save.txt` to your server.
 4. Install requirements with `pip3 install -r requirements.txt`
-5. Change the paths in `main.py` to the location of your `main.py`.
-6. Add your bot as admin to your telegram channel, and change the channelname in `main.py` to the name of your channel.
-7. Setup a cronjob: `*/5 * * * * python3 /home/path_to_main/main.py <token>`, you should get the first messages if you change the date in `save.txt` to the second, or later, message from the feed.
+5. Add your bot as admin to your telegram channel, and change the channelname in `main.py` to the name of your channel.
+6. Setup a cronjob: `*/5 * * * * python3 /home/path_to_main/main.py <token>`, you should get the first messages if you change the date in `save.txt` to the previous message from the feed.
 
 
 ## How do I use this project?

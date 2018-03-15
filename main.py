@@ -5,6 +5,7 @@ import telepot
 import os.path
 import sys
 
+
 def get_telegram_token():
 
     try:
@@ -13,14 +14,24 @@ def get_telegram_token():
 
     except IndexError:
 
-        print("You have not given an token on input")
+        raise ValueError('No token given')
 
     return token
 
 
+def get_filepath(filename):
+
+    working_directory = os.path.dirname(os.path.abspath(__file__))
+    filepath = os.path.join(working_directory, filename)
+
+    return filepath
+
+
 def get_last_update():
 
-    with open('/home/rss_feed_fh/save.txt', 'r') as file:
+    filepath = get_filepath('save.txt')
+
+    with open(filepath, 'r') as file:
 
         unparsed_last_update = file.read()
 
@@ -51,18 +62,15 @@ def check_update(first_entry_date, last_update_date):
 
         return False
 
-    else:
-
-        update_date(first_entry_date)
-
-        return True
+    return True
 
 
 def update_date(date):
 
     formatted_date = date.strftime('%Y-%m-%d %H:%M:%S')
+    filepath = get_filepath('save.txt')
 
-    with open('/home/rss_feed_fh/save.txt', 'w') as file:
+    with open(filepath, 'w') as file:
 
         file.write(formatted_date)
 
@@ -91,15 +99,19 @@ def write_update(message):
     date_time = datetime.datetime.today()
     current_date = date_time.date()
     current_time = date_time.time()
-    log_isnt_created = not os.path.isfile('/home/rss_feed_fh/log-{}.txt'.format(current_date))
+
+    filename = 'log-{}.txt'.format(current_date)
+    filepath = get_filepath(filename)
+
+    log_isnt_created = not os.path.isfile(filepath)
 
     if log_isnt_created:
 
-        with open('/home/rss_feed_fh/log-{}.txt'.format(current_date), 'w') as file:
+        with open(filepath, 'w') as file:
 
-            file.write('/home/rss_feed_fh/logs from {} \n'.format(current_date))
+            file.write('logs from {} \n'.format(current_date))
 
-    with open('/home/rss_feed_fh/log-{}.txt'.format(current_date), 'a') as file:
+    with open(filepath, 'a') as file:
 
         file.write('{}: {}\n'.format(current_time, message))
 
@@ -133,16 +145,17 @@ def main():
     complete_feed = get_rss_feed_from_url(rss_feed_url)
     entries = get_entries(complete_feed)
 
-    first_entry_date = entries[0]['published_parsed']
-    formatted_first_entry_date = datetime.datetime(*first_entry_date[:6])
+    unformatted_first_entry_date = entries[0]['published_parsed']
+    first_entry_date = datetime.datetime(*unformatted_first_entry_date[:6])
     last_update = get_last_update()
 
-    update_available = check_update(formatted_first_entry_date, last_update)
+    update_available = check_update(first_entry_date, last_update)
 
     if update_available:
 
         unsend_messages = get_new_articles(last_update, entries)
         send_messages(bot, unsend_messages, adress)
+        update_date(first_entry_date)
 
 
 if '__main__' == __name__:
@@ -151,8 +164,6 @@ if '__main__' == __name__:
 
         main()
 
-    except Exception:
+    except Exception as error:
 
-        write_update('Failed')
-
-# 2017-10-24 9:24:24 letzter eintrag
+        write_update('Failed: {}'.format(error))
