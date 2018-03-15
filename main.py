@@ -31,6 +31,14 @@ def get_last_update():
 
     filepath = get_filepath('save.txt')
 
+    file_isnt_created = os.path.isfile(filepath) is False
+
+    if file_isnt_created:
+
+        with open(filepath, 'w') as file:
+
+            file.write('2000-01-01 00:00:00')
+
     with open(filepath, 'r') as file:
 
         unparsed_last_update = file.read()
@@ -56,13 +64,9 @@ def get_entries(rss_feed):
 
 def check_update(first_entry_date, last_update_date):
 
-    first_entry_is_not_changed = first_entry_date == last_update_date
+    update_exists = first_entry_date > last_update_date
 
-    if first_entry_is_not_changed:
-
-        return False
-
-    return True
+    return update_exists
 
 
 def update_date(date):
@@ -83,7 +87,7 @@ def get_new_articles(old_date, entries):
 
         entry_time = entry['published_parsed']
         formatted_entry_time = datetime.datetime(*entry_time[:6])
-        reached_old_entry = old_date == formatted_entry_time
+        reached_old_entry = old_date >= formatted_entry_time
 
         if reached_old_entry:
 
@@ -92,6 +96,8 @@ def get_new_articles(old_date, entries):
         else:
 
             items_wich_need_to_be_sent.append(entry)
+
+    return items_wich_need_to_be_sent
 
 
 def write_update(message):

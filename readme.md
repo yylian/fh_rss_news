@@ -18,11 +18,10 @@ This Python script provides university newsfeeds as a Telegram bot.
 ### Setup/Installation
 
 1. Create a bot in Telegram, use Botfather, save the token.
-2. Check the RSS feed for the latest added Message and adjust the save.txt to the date from the feed.
-3. Move `main.py`, `requirements.txt`, and `save.txt` to your server.
-4. Install requirements with `pip3 install -r requirements.txt`
-5. Add your bot as admin to your telegram channel, and change the channelname in `main.py` to the name of your channel.
-6. Setup a cronjob: `*/5 * * * * python3 /home/path_to_main/main.py <token>`, you should get the first messages if you change the date in `save.txt` to the previous message from the feed.
+2. Move `main.py` and `requirements.txt` to your server.
+3. Install requirements with `pip3 install -r requirements.txt`
+4. Add your bot as admin to your telegram channel, and change the channelname in `main.py` to the name of your channel or solely use a Telegram UserId and get private Messages.
+5. Setup a cronjob: `*/5 * * * * python3 /home/path_to_main/main.py <token>` and add your taken instead of `<token>`. You should receive all Feed items, within the bot's first scan.
 
 
 ## How do I use this project?
@@ -35,7 +34,7 @@ This script takes the Telegram API token as an argument:
 python main.py <YOUR_SECRET>
 ```
 
-`TODO: add more usage`
+After the first scan, there should be a `save.txt` in the directory. It saves the last update.
 
 ## Contributing
 
