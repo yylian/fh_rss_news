@@ -11,7 +11,7 @@ This Python script provides university newsfeeds as a Telegram bot.
 
 ## How do I set this project up?
 
-### Prerequesites
+### Prerequisites
 
 * Python 3.4
 
@@ -33,6 +33,9 @@ This script takes the Telegram API token as an argument:
 ```shell
 python main.py <YOUR_SECRET>
 ```
+
+As for the state, a file `save.txt` is created, if not provided.
+it needs to be in the form of: `%Y-%m-%d %H:%M:%S` 
 
 After the first scan, there should be a `save.txt` in the directory. It saves the last update.
 

@@ -42,10 +42,20 @@ def get_last_update():
     with open(filepath, 'r') as file:
 
         unparsed_last_update = file.read()
+        clean_last_update = remove_newlines(unparsed_last_update)
 
-    last_update = datetime.datetime.strptime(unparsed_last_update, '%Y-%m-%d %H:%M:%S')
+    last_update = datetime.datetime.strptime(clean_last_update, '%Y-%m-%d %H:%M:%S')
 
     return last_update
+
+
+def remove_newlines(string):
+
+    if string.endswith('\n'):
+
+        string.strip('\n')
+
+    return string
 
 
 def get_rss_feed_from_url(url):
@@ -124,7 +134,7 @@ def write_update(message):
         file.write('\n')
 
 
-def send_messages(bot, unsend_messages, adress):
+def send_messages(bot, unsend_messages, address):
 
     correct_oder_list = reversed(unsend_messages)
 
@@ -138,13 +148,13 @@ def send_messages(bot, unsend_messages, adress):
         title = title + ':\n\n'
         summary = message['summary'].replace('<br />', '')
         message = title + summary + '\n\n' + timex
-        bot.sendMessage(adress, message)
+        bot.sendMessage(address, message)
         time.sleep(1)
 
 
 def main():
 
-    adress = '@fh_dortmund_aktuelles'
+    address = '@fh_dortmund_aktuelles'
     rss_feed_url = 'http://www.inf.fh-dortmund.de/rss.php'
     token = get_telegram_token()
 
@@ -162,7 +172,7 @@ def main():
     if update_available:
 
         unsend_messages = get_new_articles(last_update, entries)
-        send_messages(bot, unsend_messages, adress)
+        send_messages(bot, unsend_messages, address)
         update_date(first_entry_date)
 
 
@@ -174,4 +184,4 @@ if '__main__' == __name__:
 
     except Exception as error:
 
-        write_update('Failed: {}'.format(error))
+        write_update('Failed: {}'.format())
