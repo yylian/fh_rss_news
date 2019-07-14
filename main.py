@@ -1,6 +1,5 @@
 import feedparser
 import datetime
-import time
 import telepot
 import os.path
 import sys
@@ -149,7 +148,6 @@ def send_messages(bot, unsend_messages, address):
         summary = message['summary'].replace('<br />', '')
         message = title + summary + '\n\n' + timex
         bot.sendMessage(address, message)
-        time.sleep(1)
 
 
 def main():
