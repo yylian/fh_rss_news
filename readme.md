@@ -49,8 +49,4 @@ After the first scan, there should be a `save.txt` in the directory. It saves th
 
 ### Author/Contact information
 
-Julian Jarminowski (@hitim)
-
-### Licences
-
-MIT.
+Julian Jarminowski (@yylian)
