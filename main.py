@@ -151,7 +151,7 @@ def send_messages(entries, bot, chat_id):
 
 if __name__ == '__main__':
 
-    chat_id = -1001175135354
+    chat_id = -1001190575483
     token = get_telegram_token()
     bot = Updater(token=token, use_context=True).bot
 
