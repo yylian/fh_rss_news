@@ -1,149 +1,158 @@
 import feedparser
-import datetime
+from telegram.ext import Updater
+from telegram import ParseMode
+from markdownify import markdownify as md
+import sys
 import time
-import telepot
-from pprint import pprint
-import os.path
+from datetime import datetime
 
 
-def get_last_update():
-
-    with open('save.txt', 'r') as file:
-        date_string = file.read()
-
-    parsed_update = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-
-    return parsed_update
+DESCRIPTION_APPENDIX = ' This channel regularly posts the news from https://www.fh-dortmund.de/de/fb/4/aktuelles.php Source: https://github.com/yylian/fh_rss_news'
 
 
-def get_rss_feed_from_url(url):
+class Entry:
 
-    complete_feed = feedparser.parse(url)
+    def __init__(self, title, text, date):
 
-    return complete_feed
+        self.title = title
+        self.text = text
+        self.date = date
 
+    def __str__(self):
 
-def get_entries(feed_dict):
+        message = ''
 
-    entries_from_feed = feed_dict['entries']
+        clean_title = self.title.replace('*', '')
+        clean_title = clean_title.replace('_', '')
+        clean_title = clean_title + ':'
+        bold_title = f'*{clean_title}*'
+        full_title = bold_title + '<br /><br />'
+        text = self.text
+        text = text + '<br />'
+        text = text.replace('*', '')
+        clean_text = text.replace('_', '')
+        date = self.date.strftime('%d. %B %Y - %H:%M:%S')
 
-    return entries_from_feed
+        message = message + full_title
+        message = message + clean_text
+        message = message + date
+        message = md(message)
+        message = message.replace('\n ', '\n')
 
-
-def check_update(first_entry_date, last_update):
-
-    formatted_first_entry_date = datetime.datetime(*first_entry_date[:6])
-    first_entry_is_not_changed = formatted_first_entry_date == last_update
-
-    if first_entry_is_not_changed:
-
-        print('No updates!')
-
-        return True
-
-    else:
-
-        update_date(formatted_first_entry_date)
-        return False
-
-
-def update_date(date):
-
-    formatted_date = date.strftime('%Y-%m-%d %H:%M:%S')
-
-    with open('save.txt', 'w') as file:
-
-        file.write(formatted_date)
+        return message
 
 
-def get_new_articles(old_date, entries):
+def main(bot, chat_id):
 
-    items_wich_need_to_be_sent = []
+    rss_feed = get_rss_content()
+    all_entries = get_entries(rss_feed)
+    last_message_date = get_last_message_date(bot, chat_id)
 
-    for entry in entries:
-
-        entry_time = entry['published_parsed']
-        formatted_entry_time = datetime.datetime(*entry_time[:6])
-
-        print(formatted_entry_time)
-        print(old_date)
-
-        reached_old_entry = old_date == formatted_entry_time
-
-        if reached_old_entry:
-
-            print('hi')
-
-            return items_wich_need_to_be_sent
-
-        else:
-
-            items_wich_need_to_be_sent.append(entry)
+    entries = filter_entries(all_entries, last_message_date)
+    send_messages(entries, bot, chat_id)
 
 
-def write_update(message):
-
-    date_time = datetime.datetime.today()
-    date = date_time.date()
-    time = date_time.time()
-    log_isnt_created = not os.path.isfile(f'log-{date}.txt')
-
-    if log_isnt_created:
-
-        with open(f'log-{date}.txt', 'w') as file:
-
-            file.write(f'logs from {date} \n')
-
-    with open(f'log-{date}.txt', 'a') as file:
-
-        file.write(f'{time}: {message}\n')
-
-
-
-
-
-
-def main():
-
-    rss_feed_url = 'http://www.inf.fh-dortmund.de/rss.php'
-    token = 'TOKEN'
-    bot = telepot.Bot(token)
-
-    complete_feed = get_rss_feed_from_url(rss_feed_url)
-    entries = get_entries(complete_feed)
-
-    first_entry_date = entries[0]['published_parsed']
-    last_update = get_last_update()
-
-    if check_update(first_entry_date, last_update):
-
-        return
-
-    unsend_messages = get_new_articles(last_update, entries)
-
-    for message in unsend_messages:
-
-        pprint(message)
-        title = message['title']
-        timex = message['published_parsed']
-        timex = datetime.datetime(*timex[:6])
-        timex = timex.strftime("%d. %B %Y - %H:%M:%S")
-        title = title + ':\n\n'
-        summary = message['summary'].replace('<br />', '')
-        lolz = title + summary + '\n\n' + timex
-        bot.sendMessage(TOKEN, lolz)
-        time.sleep(1)
-
-
-if '__main__' == __name__:
+def get_telegram_token():
 
     try:
 
-        main()
-        write_update('Everything ok')
+        token = sys.argv[1]
 
-    except Exception:
+    except IndexError:
 
-        write_update('Failed')
+        raise ValueError('No token given')
 
-# 2017-10-24 9:24:24 letzter eintrag
+    return token
+
+
+def get_rss_content():
+
+    url = 'http://www.inf.fh-dortmund.de/rss.php'
+    rss_feed = feedparser.parse(url)
+
+    return rss_feed
+
+
+def get_entries(rss_content):
+
+    entries = rss_content['entries']
+    formatted_entries = []
+
+    for entry in entries:
+
+        title = entry['title']
+        text = entry['summary']
+        timestamp = entry['published_parsed']
+        date = datetime.fromtimestamp(time.mktime(timestamp))
+        new_entry = Entry(title, text, date)
+
+        formatted_entries.append(new_entry)
+
+    return formatted_entries
+
+
+def get_last_message_date(bot, chat_id):
+
+    message = bot.getChat(chat_id=chat_id).description
+    last_date = ''
+
+    if message.endswith(DESCRIPTION_APPENDIX):
+
+        position_to_cut_appendix = -1 * len(DESCRIPTION_APPENDIX)
+        last_date = message[:position_to_cut_appendix]
+
+    return last_date
+
+
+def set_last_message_date(bot, message, chat_id):
+
+    date = message.date.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    message = date + DESCRIPTION_APPENDIX
+
+    bot.set_chat_description(chat_id, message)
+
+
+def filter_entries(raw_entries, last_message_date):
+
+    entries = []
+
+    for entry in raw_entries:
+
+        date = entry.date.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+        if date == last_message_date:
+
+            return entries
+
+        entries.append(entry)
+
+    return entries
+
+
+def send_messages(entries, bot, chat_id):
+
+    if not entries:
+
+        return
+
+    last_message = entries[0]
+
+    set_last_message_date(bot, last_message, chat_id)
+
+    for entry in reversed(entries):
+
+        message = str(entry)
+
+        bot.send_message(chat_id=chat_id, text=message, parse_mode=ParseMode.MARKDOWN)
+
+        time.sleep(1)
+
+
+if __name__ == '__main__':
+
+    chat_id = -1001175135354
+    token = get_telegram_token()
+    bot = Updater(token=token, use_context=True).bot
+
+    main(bot, chat_id)
