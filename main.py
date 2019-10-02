@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 
 
-DESCRIPTION_APPENDIX = ' This channel regularly posts the news from https://www.fh-dortmund.de/de/fb/4/aktuelles.php Source: https://github.com/yylian/fh_rss_news'
+DESCRIPTION_APPENDIX = ' This channel regularly posts the news from https://www.fh-dortmund.de/de/fb/4/aktuelles.php Source: https://github.com/yylian/fhd_news'
 
 
 class Entry:
