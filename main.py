@@ -5,6 +5,8 @@ from markdownify import markdownify as md
 import sys
 import time
 from datetime import datetime
+from dateutil import parser
+import pytz
 
 
 DESCRIPTION_APPENDIX = ' This channel regularly posts the news from https://www.fh-dortmund.de/de/fb/4/aktuelles.php Source: https://github.com/yylian/fhd_news'
@@ -99,7 +101,8 @@ def get_last_message_date(bot, chat_id):
     if message.endswith(DESCRIPTION_APPENDIX):
 
         position_to_cut_appendix = -1 * len(DESCRIPTION_APPENDIX)
-        last_date = message[:position_to_cut_appendix]
+        last_date_tring = message[:position_to_cut_appendix]
+        last_date = parser.parse(last_date_tring)
 
     return last_date
 
@@ -119,9 +122,11 @@ def filter_entries(raw_entries, last_message_date):
 
     for entry in raw_entries:
 
-        date = entry.date.strftime('%Y-%m-%dT%H:%M:%SZ')
+        unaware_old_date = entry.date
 
-        if date == last_message_date:
+        old_date = pytz.utc.localize(unaware_old_date)
+
+        if old_date <= last_message_date:
 
             return entries
 
