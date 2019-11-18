@@ -16,7 +16,9 @@ jobs:
       with:
         python-version: 3.7
         
-    - uses: actions/cache@v1
+        
+    - name: Cache dependencies
+      uses: actions/cache@v1
       id: cache
       with:
         path: ~/.cache/pip
