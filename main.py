@@ -69,7 +69,7 @@ def get_telegram_token():
 
 def get_rss_content():
 
-    url = 'http://www.inf.fh-dortmund.de/rss.php'
+    url = 'https://gatekeeper-ng.informatik.fh-dortmund.de/aktuelles/aktuelles_feed'
     rss_feed = feedparser.parse(url)
 
     return rss_feed
